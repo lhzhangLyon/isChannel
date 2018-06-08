@@ -1006,5 +1006,5 @@ if __name__ == '__main__':
     c.open_url("https://www.jianshu.com/u/83c7ce3fa495",driver)
     import time,random
     time.sleep(random.uniform(5, 8))
-    print(is_channel_judge(driver, "test"))
+    print(get_list_xpath(driver, "test"))
     driver.quit()
