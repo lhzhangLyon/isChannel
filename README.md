@@ -26,10 +26,10 @@ python yourPath/find_channel.py
 demo中识别的url为[https://www.jianshu.com/u/83c7ce3fa495](https://www.jianshu.com/u/83c7ce3fa495),将输出主列表xpath
 
 ### 接口说明
-- ######is_channel_judge
+- is_channel_judge
   - 判断当前页是否为频道（有且只有一个主列表的定义为频道）
   - 返回值[ [isChannel(bool, 是否为频道页), hasMore(bool)], [listXpath(string)] ]
-- ######get_list_xpath
+- get_list_xpath
   - 若是列表的话返回主列表Xpath
   - 返回值[ [listXpath(string)] ]
 
