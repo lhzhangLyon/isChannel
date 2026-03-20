@@ -16,6 +16,7 @@ from lxml import etree
 from itertools import combinations
 import re
 import traceback
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 logging.basicConfig(level=logging.INFO,
@@ -57,6 +58,7 @@ class ChannelJudge(object):
 
         # 浏览器初始化
         self.driver = driver
+        self._patch_legacy_xpath_apis()
         
         # 日志系统初始化
         self.LOG = logging
@@ -101,6 +103,16 @@ class ChannelJudge(object):
         self.__urlBlack = ["Show!detail.action?", "/detail.action?", "detail.action?docId", "/linkFriend", "/AricleDetail", "/ArticleDetail.",
             "/detail/", "/detail.", "/NewsDetail.", "/IndexDetail.", "/InfoDetail."
         ]
+
+    def _patch_legacy_xpath_apis(self):
+        """
+        为 Selenium 4 补回旧版 find_element(s)_by_xpath 风格接口。
+        这样可以在不大规模修改旧算法代码的情况下保留兼容性。
+        """
+        if not hasattr(self.driver, "find_element_by_xpath"):
+            self.driver.find_element_by_xpath = lambda xpath: self.driver.find_element(By.XPATH, xpath)
+        if not hasattr(self.driver, "find_elements_by_xpath"):
+            self.driver.find_elements_by_xpath = lambda xpath: self.driver.find_elements(By.XPATH, xpath)
     
     def purification(self, text):
         """

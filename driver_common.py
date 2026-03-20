@@ -7,16 +7,19 @@ Description: 浏览器操作层
 Author: lhzhang.Lyon
 Date: '2018/6/5' '15:12'
 """
-import sys
-import os
-import time, json, requests
+import json
+import random
+import time
+
+import requests
 from selenium import webdriver
 import logging
-import random
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-import shutil
-import traceback
+try:
+    from selenium.webdriver.chrome.service import Service
+except ImportError:  # pragma: no cover - Selenium 3 fallback
+    Service = None
 
 
 logging.basicConfig(level=logging.INFO,
@@ -56,19 +59,25 @@ class Chrome(object):
         """
         try:
             dec = DesiredCapabilities.CHROME
-            dec['loggingPrefs'] = {'performance': 'ALL'}
+            dec['goog:loggingPrefs'] = {'performance': 'ALL'}
             opts = webdriver.ChromeOptions()
             if self.headless:
-                opts.add_argument('headless')
+                opts.add_argument('--headless=new')
             opts.add_argument('--disable-gpu')
-            opts.add_argument('--disable-images')
             opts.add_argument('--disable-plugins')
-            driver = webdriver.Chrome(chrome_options=opts, desired_capabilities=dec)
+            opts.add_argument('--blink-settings=imagesEnabled=false')
+            opts.add_argument('--no-sandbox')
+            opts.add_argument('--disable-dev-shm-usage')
+
+            if Service is not None:
+                driver = webdriver.Chrome(service=Service(), options=opts, desired_capabilities=dec)
+            else:  # pragma: no cover - Selenium 3 fallback
+                driver = webdriver.Chrome(chrome_options=opts, desired_capabilities=dec)
             driver.implicitly_wait(30)
             driver.set_page_load_timeout(100)
             return driver
-        except:
-            self.LOG.error("chrome list driver init fail！")
+        except Exception:
+            self.LOG.error("chrome list driver init fail！", exc_info=True)
             return None
 
     def getHttpStatus(self, browser):
@@ -98,8 +107,8 @@ class Chrome(object):
             time.sleep(0.5)
             try_num += 1
             Status = self.getHttpStatus(driver)
-        # print Status
-        assert Status == 200
+        if Status != 200:
+            raise RuntimeError("Failed to load {} with status {}".format(url, Status))
         time.sleep(random.uniform(3, 5))
 
     def chrome_quit(self, driver):
@@ -111,8 +120,8 @@ class Chrome(object):
 
 
 # 类接口
-def chrome_option(policy, headlsee = False):
-    return Chrome(policy, headlsee)
+def chrome_option(policy, headless = False):
+    return Chrome(policy, headless)
 
 
 if __name__ == '__main__':
@@ -121,4 +130,3 @@ if __name__ == '__main__':
     chromedriver.open_url("http://www.npc.gov.cn/", test_driver)
     print(test_driver.title)
     chromedriver.chrome_quit(test_driver)
-

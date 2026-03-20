@@ -1,47 +1,80 @@
-# 主列表识别（ischannel）
--------------
+# 主列表识别（isChannel）
 
-> 关于我
-  简书：[Tony带不带水](https://www.jianshu.com/u/83c7ce3fa495)  邮箱：[lhzhang.Lyon@gmail.com](mailto:lhzhang.Lyon@gmail.com)   
-欢迎关注联系合作
+基于 Selenium 的主列表区域识别工具，用于从页面中提取主要列表容器的 XPath。
 
-此项目下代码为简化列表识别代码，功能为提取主列表元素，爬虫相关。
-#### 结果示例:  
-红色区域为识别结果。
+## 功能
+
+- 判断当前页面是否可视为“频道页 / 列表页”
+- 提取主列表区域 XPath
+- 返回是否存在“更多”按钮等附加信息
+
+## 结果示例
+
+红色区域为识别结果。  
 ![列表识别结果图](http://upload-images.jianshu.io/upload_images/9232536-bb4eceee405047e9.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###原理说明
-[Python爬虫:细说列表识别提取](https://www.jianshu.com/p/fee79753cf9f)
+## 原理说明
 
-### 下载安装适用
-将本项目代码置于同一目录下。
-安装依赖库
-``` 
+[Python 爬虫：细说列表识别提取](https://www.jianshu.com/p/fee79753cf9f)
+
+## 环境要求
+
+- Python 3
+- Chrome 浏览器
+- 可用的 ChromeDriver（或系统已配置 Selenium Manager）
+
+安装依赖：
+
+```bash
 pip install -r requirements.txt
 ```
-运行demo代码
+
+运行示例：
+
+```bash
+python find_channel.py
 ```
-python yourPath/find_channel.py
+
+示例脚本默认识别：
+[https://www.jianshu.com/u/83c7ce3fa495](https://www.jianshu.com/u/83c7ce3fa495)
+
+## 接口说明
+
+### `is_channel_judge(chrome_driver, policyid, list_download=False)`
+
+判断当前页是否为频道页（这里的定义是：页面中只识别出一个主列表）。
+
+返回值：
+
+```python
+[[isChannel, hasMore], [listXpath]]
 ```
-demo中识别的url为[https://www.jianshu.com/u/83c7ce3fa495](https://www.jianshu.com/u/83c7ce3fa495),将输出主列表xpath
 
-### 接口说明
-- is_channel_judge
-  - 判断当前页是否为频道（有且只有一个主列表的定义为频道）
-  - 返回值[ [isChannel(bool, 是否为频道页), hasMore(bool)], [listXpath(string)] ]
-- get_list_xpath
-  - 若是列表的话返回主列表Xpath
-  - 返回值[ [listXpath(string)] ]
+### `get_list_xpath(chrome_driver, policyid, list_download=False)`
 
-### 注意事项
-- 基于python3
-- 由于需要取位置信息，基于浏览器，项目中使用的是Chrome，在driver_common.py可以自行更改
-- 支持chrmoe的headless模式
-- 如果你运行不成功请检查你是否能正常初始化浏览器
-- 若还有问题[请发邮件给我](mailto:lhzhang.Lyon@gmail.com) 
+若页面包含主列表，返回主列表区域 XPath。
 
-### TODO
-如有时间会继续维护优化此代码，也欢迎大家提交维护，代码中注释比较详细。
-优化或重构一下方面：
-1.  列表扫描方法
-2.  某些过滤条件（类似列表中有图片等等），考虑提取链接特征来优化
+返回值：
+
+```python
+[[listXpath]]
+```
+
+## 注意事项
+
+- 项目依赖浏览器定位信息，核心逻辑运行在 Chrome 驱动之上。
+- 当前版本已补充对 Selenium 4 的兼容处理。
+- 如果浏览器初始化失败，请优先检查 Chrome / ChromeDriver 是否可正常启动。
+- `driver_common.py` 中保留了浏览器相关配置，可按环境自行调整。
+
+## 已做的兼容性优化
+
+- 依赖版本从严格锁死改为较宽松范围，降低安装失败概率。
+- 补充 Selenium 4 的 `find_element(s)_by_xpath` 兼容层。
+- 更新 Chrome 初始化逻辑，兼容新的 headless 模式。
+- 用明确异常替代裸 `assert`，便于排查页面加载失败。
+
+## TODO
+
+- 继续优化列表扫描策略
+- 继续改进过滤条件，例如图片列表、链接特征等特殊场景
